@@ -3,15 +3,15 @@
 import { useState } from "react";
 const StarsDisplay = (props) => (
   <>
-    {utils.range(1, props.stars).map(star => 
+    {utils.range(1, props.stars).map(star =>
       <div className="star" key={star} />
     )}
   </>
 )
 const PlayNumber = (props) => (
-   <button className="number" 
-   style={{backgroundColor: colors[props.status]}}
-   onClick={() => console.log(props.number)}>{props.number}</button>
+  <button className="number"
+    style={{ backgroundColor: colors[props.status] }}
+    onClick={() => props.onClick(props.number, props.status)}>{props.number}</button>
 )
 
 
@@ -30,9 +30,26 @@ const StarMatch = () => {
       return 'used';
     }
     if (cddNums.includes(number)) {
-      return cddsAreX ? 'wrong': 'candidate';
+      return cddsAreX ? 'wrong' : 'candidate';
     }
     return 'available';
+  }
+
+  const onNumberClick = (number, currentStatus) => {
+    if (currentStatus === 'used') {
+      return;
+    }
+    const newCddNums = currentStatus === 'available'
+      ? cddNums.concat(number)
+      : cddNums.filter(cddNum => cddNum !== number);
+    if (utils.sum(newCddNums) !== stars) {
+      setCddNums(newCddNums);
+    } else {
+      const newAvlblNums = avlblNums.filter(avlblNum => !newCddNums.includes(avlblNum));
+      setStars(utils.randomSumIn(newAvlblNums, 9));
+      setAvlblNums(newAvlblNums);
+      setCddNums([]);
+    }
   }
   return (
     <div className="game">
@@ -46,8 +63,9 @@ const StarMatch = () => {
         <div className="right">
           {utils.range(1, 9).map(number => (
             <PlayNumber key={number}
-             number={number}
-             status={numberStatus(number)} />
+              number={number}
+              status={numberStatus(number)}
+              onClick={onNumberClick} />
           ))}
         </div>
       </div>
